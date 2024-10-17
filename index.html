@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoe Inventory Search</title>
+</head>
+<body>
+    <h1>Search for Shoes by Size</h1>
+    <form id="sizeForm">
+        <label for="size">Enter your shoe size:</label>
+        <input type="number" id="size" name="size" min="1" step="0.5" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="results">
+        <!-- Search results will appear here -->
+    </div>
+
+    <script>
+        document.getElementById('sizeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let shoeSize = document.getElementById('size').value;
+            fetchShoeData(shoeSize);
+        });
+
+        function fetchShoeData(size) {
+            // Here you'll fetch the data from your Google Sheet
+            const googleSheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/YOUR_SHEET_ID/values/Sheet1?key=YOUR_API_KEY';
+
+            fetch(googleSheetUrl)
+            .then(response => response.json())
+            .then(data => {
+                let inventory = data.values; // All rows from the Google Sheet
+                let results = inventory.filter(shoe => shoe[1] == size); // Assuming size is in the 2nd column
+
+                displayResults(results);
+            })
+            .catch(error => console.error('Error fetching the data', error));
+        }
+
+        function displayResults(results) {
+            let resultDiv = document.getElementById('results');
+            resultDiv.innerHTML = ''; // Clear previous results
+
+            if (results.length > 0) {
+                results.forEach(shoe => {
+                    let shoeDiv = document.createElement('div');
+                    shoeDiv.textContent = `Brand: ${shoe[0]}, Size: ${shoe[1]}, Price: ${shoe[2]}`; // Adjust based on your sheet
+                    resultDiv.appendChild(shoeDiv);
+                });
+            } else {
+                resultDiv.textContent = 'No shoes available in this size.';
+            }
+        }
+    </script>
+</body>
+</html>
